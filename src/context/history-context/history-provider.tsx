@@ -310,7 +310,6 @@ export const HistoryProvider: React.FC<React.PropsWithChildren> = ({
 
         await handler?.({
             undoData: action.undoData,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
     };
 
@@ -325,7 +324,6 @@ export const HistoryProvider: React.FC<React.PropsWithChildren> = ({
 
         await handler?.({
             redoData: action.redoData,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
     };
 

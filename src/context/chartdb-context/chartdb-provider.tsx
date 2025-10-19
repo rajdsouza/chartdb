@@ -476,7 +476,7 @@ export const ChartDBProvider: React.FC<
             setDiagramUpdatedAt(updatedAt);
             await Promise.all([
                 db.updateDiagram({ id: diagramId, attributes: { updatedAt } }),
-                db.updateTable({ id, attributes: table }),
+                db.updateTable({ diagramId, id, attributes: table }),
             ]);
 
             if (!!prevTable && options.updateHistory) {
@@ -684,6 +684,7 @@ export const ChartDBProvider: React.FC<
             await Promise.all([
                 db.updateDiagram({ id: diagramId, attributes: { updatedAt } }),
                 db.updateTable({
+                    diagramId,
                     id: tableId,
                     attributes: {
                         ...updateTableFn(table),
@@ -738,15 +739,6 @@ export const ChartDBProvider: React.FC<
                 })
             );
 
-            events.emit({
-                action: 'remove_field',
-                data: {
-                    tableId: tableId,
-                    fieldId,
-                    fields: fields.filter((f) => f.id !== fieldId),
-                },
-            });
-
             const table = await db.getTable({ diagramId, id: tableId });
             if (!table) {
                 return;
@@ -757,12 +749,23 @@ export const ChartDBProvider: React.FC<
             await Promise.all([
                 db.updateDiagram({ id: diagramId, attributes: { updatedAt } }),
                 db.updateTable({
+                    diagramId,
                     id: tableId,
                     attributes: {
                         ...updateTableFn(table),
                     },
                 }),
             ]);
+
+            // Emit after persistence so the chart updates at the right time
+            events.emit({
+                action: 'remove_field',
+                data: {
+                    tableId: tableId,
+                    fieldId,
+                    fields: fields.filter((f) => f.id !== fieldId),
+                },
+            });
 
             if (!!prevField && options.updateHistory) {
                 addUndoAction({
@@ -795,7 +798,9 @@ export const ChartDBProvider: React.FC<
             setTables((tables) => {
                 return tables.map((table) => {
                     if (table.id === tableId) {
+                        console.log(table, fields);
                         db.updateTable({
+                            diagramId,
                             id: tableId,
                             attributes: {
                                 ...table,
@@ -810,15 +815,6 @@ export const ChartDBProvider: React.FC<
                 });
             });
 
-            events.emit({
-                action: 'add_field',
-                data: {
-                    tableId: tableId,
-                    field,
-                    fields: [...fields, field],
-                },
-            });
-
             const table = await db.getTable({ diagramId, id: tableId });
 
             if (!table) {
@@ -827,9 +823,21 @@ export const ChartDBProvider: React.FC<
 
             const updatedAt = new Date();
             setDiagramUpdatedAt(updatedAt);
-            await Promise.all([
-                db.updateDiagram({ id: diagramId, attributes: { updatedAt } }),
-            ]);
+            //await Promise.all([
+            setTimeout(function () {
+                // db.updateDiagram({ id: diagramId, attributes: { updatedAt } });
+            }, 2000);
+            //]);
+
+            // Emit after persistence so the chart updates at the right time
+            events.emit({
+                action: 'add_field',
+                data: {
+                    tableId: tableId,
+                    field,
+                    fields: [...fields, field],
+                },
+            });
 
             if (options.updateHistory) {
                 addUndoAction({
@@ -906,6 +914,7 @@ export const ChartDBProvider: React.FC<
             await Promise.all([
                 db.updateDiagram({ id: diagramId, attributes: { updatedAt } }),
                 db.updateTable({
+                    diagramId,
                     id: tableId,
                     attributes: {
                         ...dbTable,
@@ -960,6 +969,7 @@ export const ChartDBProvider: React.FC<
             await Promise.all([
                 db.updateDiagram({ id: diagramId, attributes: { updatedAt } }),
                 db.updateTable({
+                    diagramId,
                     id: tableId,
                     attributes: {
                         ...dbTable,
@@ -1032,6 +1042,7 @@ export const ChartDBProvider: React.FC<
             await Promise.all([
                 db.updateDiagram({ id: diagramId, attributes: { updatedAt } }),
                 db.updateTable({
+                    diagramId,
                     id: tableId,
                     attributes: {
                         ...dbTable,

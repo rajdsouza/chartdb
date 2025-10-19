@@ -40,7 +40,6 @@ interface ParsedStatement {
         | 'comment'
         | 'other';
     sql: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parsed?: any;
 }
 

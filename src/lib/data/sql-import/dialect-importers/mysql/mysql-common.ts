@@ -6,7 +6,7 @@ export const parserOpts = {
 export interface SQLAstNode {
     type: string;
     keyword?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     [key: string]: any; // Need to keep any here for compatibility with Parser's AST
 }
 

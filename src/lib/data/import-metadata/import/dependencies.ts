@@ -311,7 +311,6 @@ function extractTablesFromAST(
     const tablesMap = new Map<string, { schema: string; tableName: string }>();
     const visitedNodes = new Set();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function traverse(node: any) {
         if (!node || visitedNodes.has(node)) return;
         visitedNodes.add(node);

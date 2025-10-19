@@ -73,6 +73,34 @@ ChartDB is currently in Public Beta. Star and watch this repository to get notif
 
 ## Getting Started
 
+### Server-backed storage (SQLite)
+
+To store diagrams in a local SQLite database (instead of browser IndexedDB), run the included API server and point the frontend to it.
+
+Dev mode:
+
+- Terminal 1: npm run dev
+- Terminal 2: npm run server
+
+By default, the server listens on http://localhost:8080 and creates chartdb.sqlite in the project root. You can optionally split ports by setting FRONTEND_PORT and API_PORT; for example, FRONTEND_PORT=8080 and API_PORT=8081 to serve the UI on 8080 and the API on 8081.
+
+Frontend selection:
+
+- Set VITE_STORAGE_BACKEND=server (recommended) and optionally VITE_API_BASE (e.g., empty to use same origin when served by the server, or "" in dev with proxy).
+- The app auto-selects the server backend when VITE_STORAGE_BACKEND=server or when VITE_API_BASE is set.
+
+Prod mode:
+
+- Build the frontend: npm run build
+- Start the server (it will serve static files from dist/ and the API): npm run server
+
+Env vars:
+
+- API_PORT: API server port for /api (default 8080 in dev when using same origin)
+- FRONTEND_PORT: Frontend static server port (optional; when unset, API serves static as well)
+- DB_PATH: path to the SQLite file (default ./chartdb.sqlite)
+- STATIC_DIR: directory to serve static files (default ./dist)
+
 Use the [cloud version](https://app.chartdb.io?ref=github_readme_2) or deploy locally:
 
 ### How To Use
@@ -96,40 +124,68 @@ npm install
 VITE_OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> npm run build
 ```
 
-### Run the Docker Container
+### Run the Docker Container (server + SQLite)
+
+This image runs the Express API and serves the built frontend from the same process.
 
 ```bash
-docker run -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> -p 8080:80 ghcr.io/chartdb/chartdb:latest
+# Pull and run published image
+# - Maps container port 8080 to host 8080
+# - Persists SQLite DB at ./chartdb-data/chartdb.sqlite on the host
+# - Optionally pass AI env vars used by /config.js at runtime
+
+docker run \
+  -p 8080:8080 \
+  -p 8081:8081 \
+  -v $(pwd)/chartdb-data:/data \
+  -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> \
+  -e OPENAI_API_ENDPOINT=<YOUR_ENDPOINT> \
+  -e LLM_MODEL_NAME=<YOUR_MODEL_NAME> \
+  ghcr.io/chartdb/chartdb:latest
 ```
+
+Env vars (runtime):
+- PORT: server port (default 8080)
+- DB_PATH: path to the SQLite file inside the container (default /data/chartdb.sqlite)
+- STATIC_DIR: directory with built frontend (default /usr/src/app/dist)
+- OPENAI_API_KEY, OPENAI_API_ENDPOINT, LLM_MODEL_NAME, HIDE_CHARTDB_CLOUD, DISABLE_ANALYTICS: exposed to the frontend at /config.js
 
 #### Build and Run locally
 
 ```bash
+# Build with server-backed storage enabled (default)
 docker build -t chartdb .
-docker run -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> -p 8080:80 chartdb
+
+# Run
+ docker run \
+  -p 8080:8080 \
+  -p 8081:8081 \
+  -v $(pwd)/chartdb-data:/data \
+  -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> \
+  chartdb
 ```
 
 #### Using Custom Inference Server
 
 ```bash
-# Build
+# Build-time Vite vars (optional, most can be passed at runtime via /config.js)
 docker build \
   --build-arg VITE_OPENAI_API_ENDPOINT=<YOUR_ENDPOINT> \
   --build-arg VITE_LLM_MODEL_NAME=<YOUR_MODEL_NAME> \
   -t chartdb .
 
-# Run
+# Run-time envs passed to /config.js
 docker run \
   -e OPENAI_API_ENDPOINT=<YOUR_ENDPOINT> \
   -e LLM_MODEL_NAME=<YOUR_MODEL_NAME> \
-  -p 8080:80 chartdb
+  -p 8080:8080 -p 8081:8081 chartdb
 ```
 
 > **Privacy Note:** ChartDB includes privacy-focused analytics via Fathom Analytics. You can disable this by adding `-e DISABLE_ANALYTICS=true` to the run command or `--build-arg VITE_DISABLE_ANALYTICS=true` when building.
 
 > **Note:** You must configure either Option 1 (OpenAI API key) OR Option 2 (Custom endpoint and model name) for AI capabilities to work. Do not mix the two options.
 
-Open your browser and navigate to `http://localhost:8080`.
+Open your browser and navigate to `http://localhost:8080` (frontend). The API will be available at `http://localhost:8081` when using split ports.
 
 Example configuration for a local vLLM server:
 

@@ -54,6 +54,7 @@ export interface StorageContext {
         id: string;
     }) => Promise<DBTable | undefined>;
     updateTable: (params: {
+        diagramId: string;
         id: string;
         attributes: Partial<DBTable>;
     }) => Promise<void>;

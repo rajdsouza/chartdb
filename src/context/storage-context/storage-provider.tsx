@@ -300,8 +300,9 @@ export const StorageProvider: React.FC<React.PropsWithChildren> = ({
         );
 
     const updateTable: StorageContext['updateTable'] = useCallback(
-        async ({ id, attributes }) => {
-            await db.db_tables.update(id, attributes);
+        async ({ diagramId, id, attributes }) => {
+            // Ensure we update the specific table in the specific diagram
+            await db.db_tables.where({ id, diagramId }).modify(attributes);
         },
         [db]
     );

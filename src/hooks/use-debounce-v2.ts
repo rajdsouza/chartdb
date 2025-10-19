@@ -2,7 +2,6 @@ import { useEffect, useRef, useCallback } from 'react';
 import { debounce as utilsDebounce } from '@/lib/utils';
 
 interface DebouncedFunction {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (...args: any[]): void;
     cancel?: () => void;
 }
@@ -17,7 +16,6 @@ interface DebouncedFunction {
  * @returns A debounced version of the callback
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useDebounce<T extends (...args: any[]) => any>(
     callback: T,
     delay: number
