@@ -50,6 +50,17 @@ async function saveDiagramServer(diagram: Diagram): Promise<void> {
     });
 }
 
+function toDate(v: unknown): Date {
+    return v instanceof Date ? (v as Date) : new Date(v as any);
+}
+function normalizeDiagram(d: Diagram): Diagram {
+    return {
+        ...d,
+        createdAt: toDate(d.createdAt as unknown as any),
+        updatedAt: toDate(d.updatedAt as unknown as any),
+    };
+}
+
 export const StorageProvider: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
@@ -104,12 +115,15 @@ export const StorageProvider: React.FC<React.PropsWithChildren> = ({
 
     const listDiagrams: StorageContext['listDiagrams'] =
         useCallback(async () => {
-            return await http<Diagram[]>(`/api/diagrams`);
+            const diagrams = await http<Diagram[]>(`/api/diagrams`);
+            return diagrams.map(normalizeDiagram);
         }, []);
 
     const getDiagram: StorageContext['getDiagram'] = useCallback(
         async (id: string) => {
-            return await getDiagramServer(id);
+            const d = await getDiagramServer(id);
+            if (!d) return d;
+            return normalizeDiagram(d);
         },
         []
     );

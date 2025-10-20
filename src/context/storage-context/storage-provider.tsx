@@ -12,6 +12,17 @@ import type { Area } from '@/lib/domain/area';
 import type { DBCustomType } from '@/lib/domain/db-custom-type';
 import type { DiagramFilter } from '@/lib/domain/diagram-filter/diagram-filter';
 
+function toDate(v: unknown): Date {
+    return v instanceof Date ? (v as Date) : new Date(v as any);
+}
+function normalizeDiagram(d: Diagram): Diagram {
+    return {
+        ...d,
+        createdAt: toDate(d.createdAt as unknown as any),
+        updatedAt: toDate(d.updatedAt as unknown as any),
+    };
+}
+
 export const StorageProvider: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
@@ -664,7 +675,7 @@ export const StorageProvider: React.FC<React.PropsWithChildren> = ({
                 );
             }
 
-            return diagrams;
+            return diagrams.map(normalizeDiagram);
         },
         [
             db,
