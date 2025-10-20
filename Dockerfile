@@ -29,7 +29,7 @@ RUN echo "VITE_OPENAI_API_KEY=${VITE_OPENAI_API_KEY}" > .env && \
     echo "VITE_DISABLE_ANALYTICS=${VITE_DISABLE_ANALYTICS}" >> .env && \
     echo "VITE_STORAGE_BACKEND=${VITE_STORAGE_BACKEND}" >> .env
 
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
 
 # Prune devDependencies for runtime
 RUN npm prune --omit=dev
@@ -43,6 +43,8 @@ ENV NODE_ENV=production \
     DB_PATH=/data/chartdb.sqlite \
     STATIC_DIR=/usr/src/app/dist \
     API_BASE=http://localhost:8081
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 WORKDIR /usr/src/app
 
