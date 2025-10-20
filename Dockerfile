@@ -11,6 +11,7 @@ ARG VITE_STORAGE_BACKEND=server
 WORKDIR /usr/src/app
 
 COPY package.json package-lock.json ./
+RUN npm install
 RUN npm ci
 
 COPY . .
