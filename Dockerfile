@@ -8,6 +8,12 @@ ARG VITE_HIDE_CHARTDB_CLOUD
 ARG VITE_DISABLE_ANALYTICS
 ARG VITE_STORAGE_BACKEND=server
 
+
+RUN apk add --update --no-cache python3 && \
+    ln -sf python3 /usr/bin/python && \
+    python3 -m ensurepip && \
+    pip3 install --no-cache --upgrade pip setuptools
+
 WORKDIR /usr/src/app
 
 COPY package.json package-lock.json ./
