@@ -37,7 +37,26 @@ db.exec(`
 
 // API app
 const apiApp = express();
-apiApp.use(cors());
+
+// CORS configuration (configurable via env)
+// CORS_ORIGIN or CORS_ORIGINS (comma-separated). Default: allow all in dev.
+const rawOrigins = process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || '';
+const allowAll = rawOrigins.trim() === '' || rawOrigins.trim() === '*';
+const originList = allowAll ? true : rawOrigins.split(',').map(o => o.trim()).filter(Boolean);
+const allowCredentials = String(process.env.CORS_CREDENTIALS || '').toLowerCase() === 'true';
+
+const corsOptions = {
+  origin: originList,
+  credentials: allowCredentials,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400,
+};
+
+apiApp.use(cors(corsOptions));
+// Handle preflight for all routes
+apiApp.options('*', cors(corsOptions));
+
 apiApp.use(express.json({ limit: '10mb' }));
 
 // Helpers

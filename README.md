@@ -82,7 +82,7 @@ Dev mode:
 - Terminal 1: npm run dev
 - Terminal 2: npm run server
 
-By default, the server listens on http://localhost:8080 and creates chartdb.sqlite in the project root. You can optionally split ports by setting FRONTEND_PORT and API_PORT; for example, FRONTEND_PORT=8080 and API_PORT=8081 to serve the UI on 8080 and the API on 8081.
+By default, the server listens on http://localhost:8080 and creates chartdb.sqlite in the project root. It serves the built frontend and the API from the same port (UI at / and API under /api). You can optionally split ports by setting FRONTEND_PORT and API_PORT; when unset, a single port is used.
 
 Frontend selection:
 
@@ -100,6 +100,8 @@ Env vars:
 - FRONTEND_PORT: Frontend static server port (optional; when unset, API serves static as well)
 - DB_PATH: path to the SQLite file (default ./chartdb.sqlite)
 - STATIC_DIR: directory to serve static files (default ./dist)
+- CORS_ORIGINS / CORS_ORIGIN: allowed origin(s) for CORS. Use comma-separated list or '*' (default: allow all)
+- CORS_CREDENTIALS: set to 'true' to allow credentials (cookies, Authorization headers) in CORS requests (default: false)
 
 Use the [cloud version](https://app.chartdb.io?ref=github_readme_2) or deploy locally:
 
@@ -136,7 +138,6 @@ This image runs the Express API and serves the built frontend from the same proc
 
 docker run \
   -p 8080:8080 \
-  -p 8081:8081 \
   -v $(pwd)/chartdb-data:/data \
   -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> \
   -e OPENAI_API_ENDPOINT=<YOUR_ENDPOINT> \
@@ -148,6 +149,8 @@ Env vars (runtime):
 - PORT: server port (default 8080)
 - DB_PATH: path to the SQLite file inside the container (default /data/chartdb.sqlite)
 - STATIC_DIR: directory with built frontend (default /usr/src/app/dist)
+- CORS_ORIGINS / CORS_ORIGIN: allowed origin(s) for CORS. Use comma-separated list or '*' (default: allow all)
+- CORS_CREDENTIALS: set to 'true' to allow credentials (cookies, Authorization headers) in CORS requests (default: false)
 - OPENAI_API_KEY, OPENAI_API_ENDPOINT, LLM_MODEL_NAME, HIDE_CHARTDB_CLOUD, DISABLE_ANALYTICS: exposed to the frontend at /config.js
 
 #### Build and Run locally
@@ -159,7 +162,6 @@ docker build -t chartdb .
 # Run
  docker run \
   -p 8080:8080 \
-  -p 8081:8081 \
   -v $(pwd)/chartdb-data:/data \
   -e OPENAI_API_KEY=<YOUR_OPEN_AI_KEY> \
   chartdb
@@ -178,7 +180,7 @@ docker build \
 docker run \
   -e OPENAI_API_ENDPOINT=<YOUR_ENDPOINT> \
   -e LLM_MODEL_NAME=<YOUR_MODEL_NAME> \
-  -p 8080:8080 -p 8081:8081 chartdb
+  -p 8080:8080 chartdb
 ```
 
 > **Privacy Note:** ChartDB includes privacy-focused analytics via Fathom Analytics. You can disable this by adding `-e DISABLE_ANALYTICS=true` to the run command or `--build-arg VITE_DISABLE_ANALYTICS=true` when building.

@@ -34,15 +34,13 @@ RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
 # Prune devDependencies for runtime
 RUN npm prune --omit=dev
 
-# 2) Runtime stage: run Node server that serves API + static
+# 2) Runtime stage: run Node server that serves API + static (single port)
 FROM node:22-alpine AS runtime
 
 ENV NODE_ENV=production \
-    API_PORT=8081 \
-    FRONTEND_PORT=8080 \
+    API_PORT=8080 \
     DB_PATH=/data/chartdb.sqlite \
-    STATIC_DIR=/usr/src/app/dist \
-    API_BASE=http://localhost:8081
+    STATIC_DIR=/usr/src/app/dist
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
@@ -58,6 +56,6 @@ COPY package.json ./package.json
 # Create data dir for sqlite
 RUN mkdir -p /data
 
-EXPOSE 8080 8081
+EXPOSE 8080
 
 CMD ["node", "server/index.mjs"]

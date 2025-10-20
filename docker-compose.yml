@@ -9,15 +9,11 @@ services:
     environment:
       # Runtime environment (defaults align with Dockerfile)
       NODE_ENV: production
-      API_PORT: 8081
-      FRONTEND_PORT: 8080
+      API_PORT: 8080
       DB_PATH: /data/chartdb.sqlite
       STATIC_DIR: /usr/src/app/dist
-      # When serving UI via the same container, point to the container's API port
-      API_BASE: http://localhost:4568
     ports:
-      - "4567:8080"  # Frontend
-      - "4568:8081"  # API
+      - "4567:8080"  # UI and API on same port
     volumes:
       - type: bind
         source: ./data
@@ -26,5 +22,5 @@ services:
 
 # Usage:
 # 1) docker compose up --build
-# 2) Open http://localhost:8080 for the UI; API is at http://localhost:8081
+# 2) Open http://localhost:4567 for the UI; API is at http://localhost:4567/api
 # Persisted SQLite database will be stored under ./data/chartdb.sqlite
