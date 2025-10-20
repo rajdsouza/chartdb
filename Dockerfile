@@ -9,10 +9,9 @@ ARG VITE_DISABLE_ANALYTICS
 ARG VITE_STORAGE_BACKEND=server
 
 
-RUN apk add --update --no-cache python3 && \
-    ln -sf python3 /usr/bin/python && \
-    python3 -m ensurepip && \
-    pip3 install --no-cache --upgrade pip setuptools
+RUN apk add python3 && ln -sf python3 /usr/bin/python
+RUN apk add py3-pip
+RUN apk add build-base
 
 WORKDIR /usr/src/app
 
